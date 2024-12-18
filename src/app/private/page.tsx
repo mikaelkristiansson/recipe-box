@@ -1,11 +1,13 @@
-import { redirect } from "next/navigation";
+import { redirect } from 'next/navigation';
 
-import { createClient } from "@/utils/supabase/server";
-import { PageTabs } from "./Tabs";
-import { Metadata } from "next";
+import { createClient } from '@/utils/supabase/server';
+import { PageTabs } from './Tabs';
+import { Metadata } from 'next';
+import { RecipeProvider } from '@/hooks/useRecipe';
+import { cookies } from 'next/headers';
 
 export const metadata: Metadata = {
-  title: "Recipe Box",
+  title: 'Recipe Box',
 };
 
 export default async function PrivatePage() {
@@ -13,12 +15,16 @@ export default async function PrivatePage() {
 
   const { data, error } = await supabase.auth.getUser();
   if (error || !data?.user) {
-    redirect("/login");
+    redirect('/login');
   }
+  const cookieStore = await cookies();
+  const activeRecipe = cookieStore.get('activeRecipe')?.value || null;
 
   return (
     <div className="flex w-full flex-col">
-      <PageTabs />
+      <RecipeProvider value={{ id: activeRecipe }}>
+        <PageTabs />
+      </RecipeProvider>
     </div>
   );
 }

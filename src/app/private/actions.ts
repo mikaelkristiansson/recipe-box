@@ -99,7 +99,7 @@ export async function saveRecipe(recipe: RecipeData) {
     return { status: 'error' };
   }
 
-  return { status: 'success' };
+  return { status: 'success', id: data.id as string };
 }
 
 export async function getRecipes() {

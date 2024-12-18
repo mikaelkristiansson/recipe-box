@@ -32,22 +32,8 @@ function durationToStr(d: string) {
   return formatter.format(result);
 }
 
-// function parseDuration(duration: string) {
-//   const parsed = parse(duration);
-//   let totalTime = '';
-//   if (parsed.hours) {
-//     totalTime += `(${parsed.hours} timmar`;
-//   }
-//   if (parsed.minutes) {
-//     const minutes = `${parsed.minutes} minuter`;
-//     totalTime += parsed.hours ? ` ${minutes})` : `(${minutes})`;
-//   }
-//   return totalTime;
-// }
-
 export function RecipePreview(props: { recipe: ScrapeRecipe }) {
   const { recipe } = props;
-  console.log('🚀 ~ RecipePreview ~ recipe:', recipe);
 
   return (
     <>

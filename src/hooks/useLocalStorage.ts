@@ -38,7 +38,7 @@ export function useLocalStorage(key: string, initialValue: any) {
   );
 
   const setState = React.useCallback(
-    (v: any) => {
+    (v: unknown) => {
       try {
         const nextState =
           typeof v === 'function' ? v(JSON.parse(store || '')) : v;

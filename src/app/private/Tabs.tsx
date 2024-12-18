@@ -2,9 +2,12 @@
 import { Tabs, Tab } from '@nextui-org/tabs';
 import {
   Button,
+  ButtonGroup,
   Card,
   CardBody,
   CardFooter,
+  Chip,
+  cn,
   Image,
   Input,
   Modal,
@@ -35,9 +38,18 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { RecipeView } from '@/components/recipe/view';
 import { serialize } from 'tinyduration';
 import { Time } from '@internationalized/date';
+import { toast } from 'sonner';
+import { useRecipe } from '@/hooks/useRecipe';
+import { IconsRow } from '@/components/icons/row.icon';
+import { IconsGrid } from '@/components/icons/grid.icon';
+
+type TabKey = 'recipies' | 'add' | 'week';
 
 export function PageTabs() {
-  const [activeTab, setActiveTab] = useLocalStorage('tab', null);
+  const [activeTab, setActiveTab] = useLocalStorage('tab', null) as [
+    TabKey,
+    (key: TabKey) => void
+  ];
   return (
     <Tabs
       aria-label="Options"
@@ -49,18 +61,18 @@ export function PageTabs() {
       classNames={{
         // wrapper: "h-full justify-between",
         // bg-default-100
-        base: 'fixed w-full z-20 bottom-0 bg-black',
+        base: 'fixed w-full z-20 bottom-0 bg-black py-1',
         tabContent: 'group-data-[selected=true]:text-[#06b6d4]',
         panel: 'mx-2 flex flex-col gap-2 mb-10',
       }}
       selectedKey={activeTab}
-      onSelectionChange={(key) => setActiveTab(key)}
+      onSelectionChange={(key) => setActiveTab(key as TabKey)}
     >
       <Tab key="recipies" title={<IconsFavourite className="h-6 w-6" />}>
         <Recipes />
       </Tab>
       <Tab key="add" title={<IconsTaskAdd className="h-6 w-6" />}>
-        <ImportNewRecipe />
+        <ImportNewRecipe setActiveTab={setActiveTab} />
         <CreateNewRecipe />
       </Tab>
       <Tab key="week" title={<IconsCalendar className="h-6 w-6" />}>
@@ -77,12 +89,18 @@ export function PageTabs() {
   );
 }
 
-function ImportNewRecipe() {
+function ImportNewRecipe({
+  setActiveTab,
+}: {
+  setActiveTab: (key: TabKey) => void;
+}) {
   const [newRecipe, setNewRecipe] = useState<null | ScrapeRecipe>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [state, formAction, isPending] = useActionState(loadRecipe, {
     message: 'nothing',
   });
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { action } = useRecipe();
 
   useEffect(() => {
     if (!Object.keys(state).includes('message')) {
@@ -92,8 +110,24 @@ function ImportNewRecipe() {
   }, [state]);
 
   const onSave = async (close: () => void) => {
-    await saveRecipe(newRecipe as ScrapeRecipe);
+    setIsSaving(true);
+    const response = await saveRecipe(newRecipe as ScrapeRecipe);
     close();
+    setIsSaving(false);
+    if (response.status === 'error') {
+      toast.error('Något gick fel');
+    } else {
+      toast.success('Receptet har sparats', {
+        description: 'Vill du kolla på receptet?',
+        action: {
+          label: 'Titta',
+          onClick: () => {
+            setActiveTab('recipies');
+            action({ type: 'update', data: { id: response.id as string } });
+          },
+        },
+      });
+    }
   };
 
   return (
@@ -107,6 +141,12 @@ function ImportNewRecipe() {
             name="url"
             type="text"
             placeholder="Skriv en giltig URL"
+            errorMessage={
+              (state as { message: string }).message === 'nothing'
+                ? ''
+                : (state as { message: string }).message
+            }
+            isInvalid={'message' in state && state.message !== 'nothing'}
             isRequired
           />
           <Button
@@ -130,6 +170,7 @@ function ImportNewRecipe() {
                 scrollBehavior="inside"
                 placement="center"
                 size="2xl"
+                backdrop="blur"
               >
                 <ModalContent>
                   {(onClose) => (
@@ -146,6 +187,7 @@ function ImportNewRecipe() {
                           color="danger"
                           variant="light"
                           onPress={onClose}
+                          disabled={isSaving}
                         >
                           Stäng
                         </Button>
@@ -153,6 +195,7 @@ function ImportNewRecipe() {
                           size="sm"
                           color="primary"
                           onPress={() => onSave(onClose)}
+                          isLoading={isSaving}
                         >
                           Spara
                         </Button>
@@ -161,8 +204,6 @@ function ImportNewRecipe() {
                   )}
                 </ModalContent>
               </Modal>
-            ) : (state as { message: string }).message !== 'nothing' ? (
-              (state as { message: string }).message
             ) : null}
           </>
         )}
@@ -373,6 +414,7 @@ function CreateNewRecipe() {
             scrollBehavior="inside"
             placement="center"
             size="2xl"
+            backdrop="blur"
           >
             <ModalContent>
               {(onClose) => (
@@ -406,10 +448,19 @@ function CreateNewRecipe() {
 function Recipes() {
   const [list, setList] = useState<null | RecipeList[]>(null);
   const [activeRecipe, setActiveRecipe] = useState<null | Recipe>(null);
+  const { recipe, action } = useRecipe();
+  const [columns, setColumns] = useState(1);
+
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   useEffect(() => {
     getRecipes().then((data) => setList(data));
   }, []);
+
+  useEffect(() => {
+    if (recipe.id) {
+      openRecipe(recipe.id);
+    }
+  }, [recipe]);
 
   const openRecipe = async (id: string) => {
     const recipe = await getRecipe(id);
@@ -418,52 +469,86 @@ function Recipes() {
   };
 
   return (
-    <div className="gap-2 grid grid-cols-2 sm:grid-cols-4">
-      {list?.map((item) => (
-        <Card
-          shadow="sm"
-          key={item.id}
-          isPressable
-          onPress={() => openRecipe(item.id)}
+    <>
+      <ButtonGroup className="flex justify-start">
+        <Button
+          isIconOnly
+          variant={columns === 1 ? 'flat' : 'solid'}
+          size="sm"
+          onClick={() => setColumns(1)}
         >
-          <CardBody className="overflow-visible p-0">
-            <Image
-              shadow="sm"
-              radius="none"
-              width="100%"
-              alt={item.name}
-              className="w-full object-cover h-[140px]"
-              src={item.image}
-            />
-          </CardBody>
-          <CardFooter className="text-small justify-between">
-            <b>{item.name}</b>
-            <p className="text-default-500">{item.category}</p>
-          </CardFooter>
-        </Card>
-      ))}
-      <Modal
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        scrollBehavior="inside"
-        placement="center"
-        size="full"
+          <IconsRow className="h-5 w-5" />
+        </Button>
+        <Button
+          isIconOnly
+          variant={columns === 2 ? 'flat' : 'solid'}
+          size="sm"
+          onClick={() => setColumns(2)}
+        >
+          <IconsGrid className="h-5 w-5" />
+        </Button>
+      </ButtonGroup>
+      <div
+        className={cn(
+          'gap-2 grid sm:grid-cols-4',
+          columns === 1 ? 'grid-cols-1' : 'grid-cols-2'
+        )}
       >
-        <ModalContent>
-          <>
-            <ModalHeader className="flex flex-col gap-1">
-              {activeRecipe?.name}
-            </ModalHeader>
-            <ModalBody>
-              {activeRecipe ? (
-                <RecipeView recipe={activeRecipe} />
-              ) : (
-                <Spinner />
+        {list?.map((item) => (
+          <Card
+            shadow="sm"
+            key={item.id}
+            isPressable
+            onPress={() => action({ type: 'update', data: { id: item.id } })}
+          >
+            <CardBody className="overflow-visible p-0">
+              <Image
+                shadow="sm"
+                radius="none"
+                width="100%"
+                alt={item.name}
+                className="w-full object-cover h-[140px]"
+                src={item.image}
+              />
+              {item.category && (
+                <Chip
+                  variant="flat"
+                  size="sm"
+                  className="absolute right-2 top-2 z-10 backdrop-blur-md bg-black/30"
+                >
+                  {item.category}
+                </Chip>
               )}
-            </ModalBody>
-          </>
-        </ModalContent>
-      </Modal>
-    </div>
+            </CardBody>
+            <CardFooter className="text-small justify-between">
+              <b className="text-left">{item.name}</b>
+            </CardFooter>
+          </Card>
+        ))}
+        <Modal
+          isOpen={isOpen}
+          onOpenChange={onOpenChange}
+          scrollBehavior="inside"
+          placement="center"
+          size="full"
+          onClose={() => action({ type: 'update', data: { id: null } })}
+        >
+          <ModalContent>
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                {activeRecipe?.name}
+              </ModalHeader>
+              <ModalBody>
+                {activeRecipe ? (
+                  <RecipeView recipe={activeRecipe} />
+                ) : (
+                  <Spinner />
+                )}
+              </ModalBody>
+            </>
+          </ModalContent>
+        </Modal>
+      </div>
+    </>
   );
 }
