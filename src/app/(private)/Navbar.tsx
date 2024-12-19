@@ -14,6 +14,7 @@ import { IconsPackageOpen } from '@/components/icons/box.icon';
 import { Chip } from '@nextui-org/react';
 import { IconsLogout } from '@/components/icons/log-out.icon';
 import { IconsSettings } from '@/components/icons/settings.icon';
+import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 
 const acronym = (str: string) =>
   str
@@ -34,6 +35,7 @@ export function NavigationBar() {
         </Chip>
       </NavbarBrand>
       <NavbarContent as="div" justify="end">
+        <ThemeSwitcher />
         <Dropdown placement="bottom-end">
           <DropdownTrigger>
             <Avatar
@@ -57,12 +59,17 @@ export function NavigationBar() {
             />
           </DropdownTrigger>
           <DropdownMenu aria-label="Profile Actions" variant="flat">
-            <DropdownItem key="settings">
+            <DropdownItem key="settings" textValue="Settings">
               <span className="flex flex-row items-center gap-2">
                 <IconsSettings size={18} /> Settings
               </span>
             </DropdownItem>
-            <DropdownItem key="logout" color="danger" onClick={signOut}>
+            <DropdownItem
+              key="logout"
+              color="danger"
+              onPress={signOut}
+              textValue="Log Out"
+            >
               <span className="flex flex-row items-center gap-2">
                 <IconsLogout size={18} /> Log Out
               </span>

@@ -1,56 +1,117 @@
-"use client";
-import { login } from "./actions";
-import { Input } from "@nextui-org/input";
-import { Button } from "@nextui-org/button";
-import Link from "next/link";
+'use client';
+import { login, signup } from './actions';
+import {
+  Tabs,
+  Tab,
+  Input,
+  Button,
+  Card,
+  CardBody,
+  Alert,
+} from '@nextui-org/react';
+import { useActionState, useState } from 'react';
 
 export function Form() {
+  const [selected, setSelected] = useState('login');
+  const [loginState, loginFormAction, loginIsPending] = useActionState(
+    (_prev: unknown, formData: FormData) => login(formData),
+    { status: 'idle', email: '' }
+  );
+
   return (
     <div className="flex h-full w-full justify-center items-center mt-6">
-      <div className="w-full h-full max-w-96 border border-default-200 dark:border-default-100 p-4 rounded-lg">
-        <form className="flex flex-col gap-2">
-          <Input
-            label="Email"
-            id="email"
-            name="email"
-            type="email"
-            placeholder="Enter your email"
-            labelPlacement="outside"
-            required
-          />
-          <Input
-            label="Password"
-            id="password"
-            name="password"
-            type="password"
-            placeholder="Enter your password"
-            labelPlacement="outside"
-            required
-          />
-          <div className="flex gap-2">
-            <Button
-              color="primary"
-              variant="flat"
-              size="sm"
-              type="submit"
-              formAction={login}
-            >
-              Log in
-            </Button>
-            OR
-            <Button
-              color="secondary"
-              variant="flat"
-              size="sm"
-              type="button"
-              as={Link}
-              href="/auth/sign-up"
-            >
-              Sign up
-            </Button>
-          </div>
-        </form>
-      </div>
+      <Card className="max-w-full w-[340px]">
+        <CardBody className="overflow-hidden">
+          <Tabs
+            fullWidth
+            aria-label="Tabs form"
+            selectedKey={selected}
+            size="md"
+            onSelectionChange={(key) => setSelected(String(key))}
+          >
+            <Tab key="login" title="Login">
+              <form className="flex flex-col gap-4" action={loginFormAction}>
+                <Input
+                  isRequired
+                  label="Email"
+                  name="email"
+                  placeholder="Enter your email"
+                  type="email"
+                  isDisabled={loginIsPending}
+                  defaultValue={loginState.email}
+                  key={loginState.email}
+                />
+                <Input
+                  isRequired
+                  label="Password"
+                  name="password"
+                  placeholder="Enter your password"
+                  type="password"
+                  isDisabled={loginIsPending}
+                />
+                {loginState?.status === 'error' && (
+                  <Alert
+                    color="danger"
+                    variant="faded"
+                    description="Fel användarnamn eller lösenord, försök igen"
+                  />
+                )}
+                <Button
+                  color="primary"
+                  variant="flat"
+                  size="sm"
+                  type="submit"
+                  isLoading={loginIsPending}
+                >
+                  Log in
+                </Button>
+              </form>
+            </Tab>
+            <Tab key="sign-up" title="Sign up">
+              <form className="flex flex-col gap-4">
+                <Input
+                  isRequired
+                  label="First name"
+                  placeholder="Enter your first name"
+                  name="first_name"
+                  type="text"
+                />
+                <Input
+                  isRequired
+                  label="Last name"
+                  placeholder="Enter your last name"
+                  name="last_name"
+                  type="text"
+                />
+                <Input
+                  isRequired
+                  label="Email"
+                  placeholder="Enter your email"
+                  name="email"
+                  type="email"
+                />
+                <Input
+                  isRequired
+                  label="Password"
+                  placeholder="Enter your password"
+                  name="password"
+                  type="password"
+                />
+                <Button
+                  fullWidth
+                  color="primary"
+                  variant="flat"
+                  size="sm"
+                  type="submit"
+                  formAction={signup}
+                >
+                  Sign up
+                </Button>
+              </form>
+            </Tab>
+          </Tabs>
+        </CardBody>
+      </Card>
     </div>
   );
 }

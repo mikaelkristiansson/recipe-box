@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
-import { Form } from "./form";
+import type { Metadata } from 'next';
+import { Form } from './form';
 
 export const metadata: Metadata = {
-  title: "Recipe Box - login",
+  title: 'Recipe Box - login',
 };
 
-export default function LoginPage() {
+export default async function LoginPage() {
   return <Form />;
 }

@@ -2,6 +2,7 @@
 
 import { ScrapeRecipe } from '@/utils/recipe/scraper';
 import { createClient } from '@/utils/supabase/server';
+import { getScrapedRecipe } from '@/utils/recipe/scraper';
 
 export type Recipe = {
   id: string;
@@ -49,6 +50,24 @@ function fetchImage(url: string) {
 type RecipeData = {
   image: string | string[] | File;
 } & Omit<ScrapeRecipe, 'id' | 'image'>;
+
+export async function loadRecipe(_prevState: unknown, formData: FormData) {
+  const url = formData.get('url') as string;
+  if (!isValidUrl(url)) {
+    return { message: 'Invalid URL' };
+  }
+  const recipe = await getScrapedRecipe(url);
+  return recipe;
+}
+
+function isValidUrl(url: string) {
+  try {
+    new URL(url);
+    return true;
+  } catch (_err) {
+    return false;
+  }
+}
 
 export async function saveRecipe(recipe: RecipeData) {
   const supabase = await createClient();
