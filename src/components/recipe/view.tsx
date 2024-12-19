@@ -9,7 +9,7 @@ import {
 } from '@nextui-org/react';
 import { parse } from 'tinyduration';
 import { IconsHourglass } from '../icons/hourglass.icon';
-import { Recipe } from '@/app/private/actions';
+import { Recipe } from '@/app/types';
 
 export function RecipeView(props: { recipe: Recipe }) {
   const { recipe } = props;

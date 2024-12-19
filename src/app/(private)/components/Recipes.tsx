@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getRecipe, getRecipes, Recipe, RecipeList } from '../actions';
+import { getRecipe, getRecipes } from '../actions';
 import { useRecipe } from '@/hooks/useRecipe';
 import {
   Button,
@@ -20,6 +20,7 @@ import {
 import { IconsRow } from '@/components/icons/row.icon';
 import { IconsGrid } from '@/components/icons/grid.icon';
 import { RecipeView } from '@/components/recipe/view';
+import { Recipe, RecipeList } from '@/app/types';
 
 export function Recipes() {
   const [list, setList] = useState<null | RecipeList[]>(null);

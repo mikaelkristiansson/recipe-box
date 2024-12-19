@@ -5,7 +5,7 @@ import { IconsCalendar } from '@/components/icons/calendar.icon';
 import { IconsTaskAdd } from '@/components/icons/add-task.icon';
 import { IconsFavourite } from '@/components/icons/heart.icon';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { TabKey } from './types';
+import { TabKey } from '../types';
 import { ImportNewRecipe } from './components/ImportRecipe';
 import { CreateNewRecipe } from './components/CreateRecipe';
 import { Recipes } from './components/Recipes';

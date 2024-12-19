@@ -1,6 +1,6 @@
 import { loadRecipe } from '../actions';
 import { toast } from 'sonner';
-import { TabKey } from '../types';
+import { TabKey } from '../../types';
 import { useActionState, useEffect, useState } from 'react';
 import { ScrapeRecipe } from '@/utils/recipe/scraper';
 import {
