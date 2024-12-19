@@ -4,25 +4,26 @@ import { Card, CardBody } from '@nextui-org/react';
 import { IconsCalendar } from '@/components/icons/calendar.icon';
 import { IconsTaskAdd } from '@/components/icons/add-task.icon';
 import { IconsFavourite } from '@/components/icons/heart.icon';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { TabKey } from '../types';
 import { ImportNewRecipe } from './components/ImportRecipe';
 import { CreateNewRecipe } from './components/CreateRecipe';
 import { Recipes } from './components/Recipes';
 import { useRecipeList } from '@/hooks/useRecipeList';
-import { getRecipes } from './actions';
-import { useEffect } from 'react';
+import { getRecipes, updateActiveTab } from './actions';
+import { useEffect, useState } from 'react';
 
-export function PageTabs() {
-  const [activeTab, setActiveTab] = useLocalStorage('tab', null) as [
-    TabKey,
-    (key: TabKey) => void
-  ];
+export function PageTabs({ activeTab }: { activeTab: TabKey }) {
+  const [tab, setTab] = useState<TabKey>(activeTab);
   const { action } = useRecipeList();
 
   useEffect(() => {
     getRecipes().then((data) => action({ type: 'set', data }));
   }, []);
+
+  const setActiveTab = (key: TabKey) => {
+    setTab(key);
+    updateActiveTab(key);
+  };
 
   return (
     <Tabs
@@ -39,7 +40,7 @@ export function PageTabs() {
         tabContent: 'group-data-[selected=true]:text-[#06b6d4]',
         panel: 'mx-2 flex flex-col gap-2 mb-16',
       }}
-      selectedKey={activeTab}
+      selectedKey={tab}
       onSelectionChange={(key) => setActiveTab(key as TabKey)}
     >
       <Tab key="recipes" title={<IconsFavourite className="h-6 w-6" />}>

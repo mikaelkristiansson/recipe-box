@@ -2,7 +2,7 @@
 import { ScrapeRecipe } from '@/utils/recipe/scraper';
 import { createClient } from '@/utils/supabase/server';
 import { getScrapedRecipe } from '@/utils/recipe/scraper';
-import { Recipe, RecipeList } from '../types';
+import { Recipe, RecipeList, TabKey } from '../types';
 import { cache } from 'react';
 import { cookies } from 'next/headers';
 
@@ -148,6 +148,11 @@ export async function getRecipe(id: string) {
 export async function closeRecipe() {
   const cookieStore = await cookies();
   cookieStore.delete('activeRecipe');
+}
+
+export async function updateActiveTab(tab: TabKey) {
+  const cookieStore = await cookies();
+  cookieStore.set('activeTab', tab);
 }
 
 export async function deleteRecipe(id: string) {
