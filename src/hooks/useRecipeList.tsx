@@ -8,7 +8,7 @@ type SetAction = {
 };
 
 type UpdateAction = {
-  type: 'update';
+  type: 'update' | 'delete';
   data: RecipeList;
 };
 
@@ -34,6 +34,9 @@ function recipeListReducer(
     }
     case 'set': {
       return action.data;
+    }
+    case 'delete': {
+      return recipes.filter((recipe) => recipe.id !== action.data.id);
     }
     default: {
       return recipes;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getRecipe } from '../actions';
+import { deleteRecipe, getRecipe } from '../actions';
 import { useRecipe } from '@/hooks/useRecipe';
 import {
   Button,
@@ -13,6 +13,7 @@ import {
   Modal,
   ModalBody,
   ModalContent,
+  ModalFooter,
   ModalHeader,
   Skeleton,
   Spinner,
@@ -30,7 +31,7 @@ export function Recipes() {
   const [columns, setColumns] = useState(1);
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const { recipes } = useRecipeList();
+  const { recipes, action: listAction } = useRecipeList();
 
   useEffect(() => {
     if (recipe.id) {
@@ -144,6 +145,24 @@ export function Recipes() {
                   </>
                 )}
               </ModalBody>
+              {activeRecipe ? (
+                <ModalFooter>
+                  <Button
+                    variant="flat"
+                    size="sm"
+                    color="danger"
+                    type="button"
+                    onPress={() =>
+                      deleteRecipe(activeRecipe.id).then(() => {
+                        onOpenChange();
+                        listAction({ type: 'delete', data: activeRecipe });
+                      })
+                    }
+                  >
+                    Ta bort recept
+                  </Button>
+                </ModalFooter>
+              ) : null}
             </>
           </ModalContent>
         </Modal>
