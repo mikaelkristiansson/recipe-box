@@ -54,7 +54,7 @@ export function Recipes() {
           isIconOnly
           variant="flat"
           size="sm"
-          className={cn(columns === 1 && 'bg-gray-200')}
+          className={cn(columns === 1 && 'bg-default')}
           onPress={() => setColumns(1)}
         >
           <IconsRow className="h-5 w-5" />
@@ -63,7 +63,7 @@ export function Recipes() {
           isIconOnly
           variant="flat"
           size="sm"
-          className={cn(columns === 2 && 'bg-gray-200')}
+          className={cn(columns === 2 && 'bg-default')}
           onPress={() => setColumns(2)}
         >
           <IconsGrid className="h-5 w-5" />
