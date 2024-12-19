@@ -25,10 +25,10 @@ export function PageTabs() {
       variant="light"
       classNames={{
         // wrapper: "h-full justify-between",
-        base: 'fixed w-full z-20 bottom-0 bg-background py-2',
+        base: 'fixed w-full z-20 bottom-0 bg-background pt-2 pb-4',
         tab: 'data-[selected=true]:bg-transparent',
         tabContent: 'group-data-[selected=true]:text-[#06b6d4]',
-        panel: 'mx-2 flex flex-col gap-2 mb-12',
+        panel: 'mx-2 flex flex-col gap-2 mb-16',
       }}
       selectedKey={activeTab}
       onSelectionChange={(key) => setActiveTab(key as TabKey)}

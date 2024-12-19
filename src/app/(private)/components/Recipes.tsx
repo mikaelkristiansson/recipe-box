@@ -14,6 +14,7 @@ import {
   ModalBody,
   ModalContent,
   ModalHeader,
+  Skeleton,
   Spinner,
   useDisclosure,
 } from '@nextui-org/react';
@@ -42,7 +43,6 @@ export function Recipes() {
   const openRecipe = async (id: string) => {
     const recipe = await getRecipe(id);
     setActiveRecipe(recipe);
-    onOpen();
   };
 
   if (!list) return <Spinner />;
@@ -52,16 +52,18 @@ export function Recipes() {
       <ButtonGroup className="flex justify-start">
         <Button
           isIconOnly
-          variant={columns === 1 ? 'flat' : 'solid'}
+          variant="flat"
           size="sm"
+          className={cn(columns === 1 && 'bg-gray-200')}
           onPress={() => setColumns(1)}
         >
           <IconsRow className="h-5 w-5" />
         </Button>
         <Button
           isIconOnly
-          variant={columns === 2 ? 'flat' : 'solid'}
+          variant="flat"
           size="sm"
+          className={cn(columns === 2 && 'bg-gray-200')}
           onPress={() => setColumns(2)}
         >
           <IconsGrid className="h-5 w-5" />
@@ -75,10 +77,12 @@ export function Recipes() {
       >
         {list?.map((item) => (
           <Card
-            shadow="sm"
             key={item.id}
             isPressable
-            onPress={() => action({ type: 'update', data: { id: item.id } })}
+            onPress={() => {
+              onOpen();
+              action({ type: 'update', data: { id: item.id } });
+            }}
           >
             <CardBody className="overflow-visible p-0">
               <Image
@@ -110,7 +114,10 @@ export function Recipes() {
           scrollBehavior="inside"
           placement="center"
           size="full"
-          onClose={() => action({ type: 'update', data: { id: null } })}
+          onClose={() => {
+            action({ type: 'update', data: { id: null } });
+            setActiveRecipe(null);
+          }}
         >
           <ModalContent>
             <>
@@ -121,7 +128,22 @@ export function Recipes() {
                 {activeRecipe ? (
                   <RecipeView recipe={activeRecipe} />
                 ) : (
-                  <Spinner />
+                  <>
+                    <Skeleton className="rounded-lg">
+                      <div className="h-[240px] rounded-lg bg-default-300" />
+                    </Skeleton>
+                    <div className="space-y-3">
+                      <Skeleton className="w-3/5 rounded-lg">
+                        <div className="h-3 w-3/5 rounded-lg bg-default-200" />
+                      </Skeleton>
+                      <Skeleton className="w-4/5 rounded-lg">
+                        <div className="h-3 w-4/5 rounded-lg bg-default-200" />
+                      </Skeleton>
+                      <Skeleton className="w-2/5 rounded-lg">
+                        <div className="h-3 w-2/5 rounded-lg bg-default-300" />
+                      </Skeleton>
+                    </div>
+                  </>
                 )}
               </ModalBody>
             </>
