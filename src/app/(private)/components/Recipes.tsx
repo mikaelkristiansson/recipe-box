@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { deleteRecipe, getRecipe } from '../actions';
+import { closeRecipe, deleteRecipe, getRecipe } from '../actions';
 import { useRecipe } from '@/hooks/useRecipe';
 import {
   Button,
@@ -116,6 +116,7 @@ export function Recipes() {
           onClose={() => {
             action({ type: 'update', data: { id: null } });
             setActiveRecipe(null);
+            closeRecipe();
           }}
         >
           <ModalContent>

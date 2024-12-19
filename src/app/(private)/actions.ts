@@ -4,6 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import { getScrapedRecipe } from '@/utils/recipe/scraper';
 import { Recipe, RecipeList } from '../types';
 import { cache } from 'react';
+import { cookies } from 'next/headers';
 
 function fetchImage(url: string) {
   return fetch(url).then((res) => res.blob());
@@ -138,7 +139,15 @@ export async function getRecipe(id: string) {
     .getPublicUrl(recipe.id);
   recipe.image = image.publicUrl;
 
+  const cookieStore = await cookies();
+  cookieStore.set('activeRecipe', recipe.id);
+
   return recipe;
+}
+
+export async function closeRecipe() {
+  const cookieStore = await cookies();
+  cookieStore.delete('activeRecipe');
 }
 
 export async function deleteRecipe(id: string) {

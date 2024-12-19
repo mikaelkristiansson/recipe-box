@@ -6,3 +6,7 @@ html,
 body {
   overscroll-behavior: none;
 }
+
+button[aria-label='Close'] > svg {
+  @apply w-6 h-6;
+}
