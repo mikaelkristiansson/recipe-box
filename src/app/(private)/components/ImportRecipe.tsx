@@ -19,6 +19,7 @@ import {
 import { useRecipe } from '@/hooks/useRecipe';
 import { saveRecipe } from '../actions';
 import { RecipePreview } from '@/components/recipe/preview';
+import { useRecipeList } from '@/hooks/useRecipeList';
 
 export function ImportNewRecipe({
   setActiveTab,
@@ -32,6 +33,7 @@ export function ImportNewRecipe({
   });
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const { action } = useRecipe();
+  const { action: listAction } = useRecipeList();
 
   useEffect(() => {
     if (!Object.keys(state).includes('message')) {
@@ -48,13 +50,21 @@ export function ImportNewRecipe({
     if (response.status === 'error') {
       toast.error('Något gick fel');
     } else {
+      if (response.data) {
+        listAction({ type: 'update', data: response.data });
+      }
       toast.success('Receptet har sparats', {
         description: 'Vill du kolla på receptet?',
         action: {
           label: 'Titta',
           onClick: () => {
             setActiveTab('recipes');
-            action({ type: 'update', data: { id: response.id as string } });
+            if (response.data) {
+              action({
+                type: 'update',
+                data: { id: response.data.id },
+              });
+            }
           },
         },
       });

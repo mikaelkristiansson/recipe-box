@@ -5,6 +5,7 @@ import { PageTabs } from './Tabs';
 import { Metadata } from 'next';
 import { RecipeProvider } from '@/hooks/useRecipe';
 import { cookies } from 'next/headers';
+import { RecipeListProvider } from '@/hooks/useRecipeList';
 
 export const metadata: Metadata = {
   title: 'Recipe Box',
@@ -22,9 +23,11 @@ export default async function PrivatePage() {
 
   return (
     <div className="flex w-full flex-col">
-      <RecipeProvider value={{ id: activeRecipe }}>
-        <PageTabs />
-      </RecipeProvider>
+      <RecipeListProvider>
+        <RecipeProvider value={{ id: activeRecipe }}>
+          <PageTabs />
+        </RecipeProvider>
+      </RecipeListProvider>
     </div>
   );
 }

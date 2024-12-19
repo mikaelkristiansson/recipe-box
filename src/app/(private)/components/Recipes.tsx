@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getRecipe, getRecipes } from '../actions';
+import { getRecipe } from '../actions';
 import { useRecipe } from '@/hooks/useRecipe';
 import {
   Button,
@@ -21,21 +21,20 @@ import {
 import { IconsRow } from '@/components/icons/row.icon';
 import { IconsGrid } from '@/components/icons/grid.icon';
 import { RecipeView } from '@/components/recipe/view';
-import { Recipe, RecipeList } from '@/app/types';
+import { Recipe } from '@/app/types';
+import { useRecipeList } from '@/hooks/useRecipeList';
 
 export function Recipes() {
-  const [list, setList] = useState<null | RecipeList[]>(null);
   const [activeRecipe, setActiveRecipe] = useState<null | Recipe>(null);
   const { recipe, action } = useRecipe();
   const [columns, setColumns] = useState(1);
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  useEffect(() => {
-    getRecipes().then((data) => setList(data));
-  }, []);
+  const { recipes } = useRecipeList();
 
   useEffect(() => {
     if (recipe.id) {
+      onOpen();
       openRecipe(recipe.id);
     }
   }, [recipe]);
@@ -45,7 +44,7 @@ export function Recipes() {
     setActiveRecipe(recipe);
   };
 
-  if (!list) return <Spinner />;
+  if (!recipes) return <Spinner />;
 
   return (
     <>
@@ -75,12 +74,11 @@ export function Recipes() {
           columns === 1 ? 'grid-cols-1' : 'grid-cols-2'
         )}
       >
-        {list?.map((item) => (
+        {recipes.map((item) => (
           <Card
             key={item.id}
             isPressable
             onPress={() => {
-              onOpen();
               action({ type: 'update', data: { id: item.id } });
             }}
           >

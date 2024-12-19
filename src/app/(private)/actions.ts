@@ -1,9 +1,9 @@
 'use server';
-
 import { ScrapeRecipe } from '@/utils/recipe/scraper';
 import { createClient } from '@/utils/supabase/server';
 import { getScrapedRecipe } from '@/utils/recipe/scraper';
 import { Recipe, RecipeList } from '../types';
+import { cache } from 'react';
 
 function fetchImage(url: string) {
   return fetch(url).then((res) => res.blob());
@@ -80,11 +80,12 @@ export async function saveRecipe(recipe: RecipeData) {
     return { status: 'error' };
   }
 
-  return { status: 'success', id: data.id as string };
+  return { status: 'success', data: data as RecipeList };
 }
 
-export async function getRecipes() {
+export const getRecipes = cache(async () => {
   const supabase = await createClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -115,7 +116,7 @@ export async function getRecipes() {
   });
 
   return updatedRecipes;
-}
+});
 
 export async function getRecipe(id: string) {
   const supabase = await createClient();

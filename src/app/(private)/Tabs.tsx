@@ -9,12 +9,21 @@ import { TabKey } from '../types';
 import { ImportNewRecipe } from './components/ImportRecipe';
 import { CreateNewRecipe } from './components/CreateRecipe';
 import { Recipes } from './components/Recipes';
+import { useRecipeList } from '@/hooks/useRecipeList';
+import { getRecipes } from './actions';
+import { useEffect } from 'react';
 
 export function PageTabs() {
   const [activeTab, setActiveTab] = useLocalStorage('tab', null) as [
     TabKey,
     (key: TabKey) => void
   ];
+  const { action } = useRecipeList();
+
+  useEffect(() => {
+    getRecipes().then((data) => action({ type: 'set', data }));
+  }, []);
+
   return (
     <Tabs
       aria-label="Options"
