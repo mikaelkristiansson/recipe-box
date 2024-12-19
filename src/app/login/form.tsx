@@ -37,6 +37,7 @@ export function Form() {
                   name="email"
                   placeholder="Enter your email"
                   type="email"
+                  variant="bordered"
                   isDisabled={loginIsPending}
                   defaultValue={loginState.email}
                   key={loginState.email}
@@ -47,6 +48,7 @@ export function Form() {
                   name="password"
                   placeholder="Enter your password"
                   type="password"
+                  variant="bordered"
                   isDisabled={loginIsPending}
                 />
                 {loginState?.status === 'error' && (
@@ -59,7 +61,6 @@ export function Form() {
                 <Button
                   color="primary"
                   variant="flat"
-                  size="sm"
                   type="submit"
                   isLoading={loginIsPending}
                 >
@@ -75,6 +76,7 @@ export function Form() {
                   placeholder="Enter your first name"
                   name="first_name"
                   type="text"
+                  variant="bordered"
                 />
                 <Input
                   isRequired
@@ -82,6 +84,7 @@ export function Form() {
                   placeholder="Enter your last name"
                   name="last_name"
                   type="text"
+                  variant="bordered"
                 />
                 <Input
                   isRequired
@@ -89,6 +92,7 @@ export function Form() {
                   placeholder="Enter your email"
                   name="email"
                   type="email"
+                  variant="bordered"
                 />
                 <Input
                   isRequired
@@ -96,12 +100,12 @@ export function Form() {
                   placeholder="Enter your password"
                   name="password"
                   type="password"
+                  variant="bordered"
                 />
                 <Button
                   fullWidth
                   color="primary"
                   variant="flat"
-                  size="sm"
                   type="submit"
                   formAction={signup}
                 >

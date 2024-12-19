@@ -93,7 +93,6 @@ export function ImportNewRecipe({
           <Button
             color="primary"
             variant="flat"
-            size="sm"
             type="submit"
             disabled={isPending}
           >
@@ -124,7 +123,6 @@ export function ImportNewRecipe({
                       </ModalBody>
                       <ModalFooter>
                         <Button
-                          size="sm"
                           color="danger"
                           variant="light"
                           onPress={onClose}
@@ -133,7 +131,6 @@ export function ImportNewRecipe({
                           Stäng
                         </Button>
                         <Button
-                          size="sm"
                           color="primary"
                           onPress={() => onSave(onClose)}
                           isLoading={isSaving}

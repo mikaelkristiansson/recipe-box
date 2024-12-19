@@ -1,5 +1,6 @@
 import {
   Image,
+  Link,
   Table,
   TableBody,
   TableCell,
@@ -111,6 +112,18 @@ export function RecipeView(props: { recipe: Recipe }) {
           )}
         </div>
       </div>
+      {recipe.url && (
+        <Link
+          isBlock
+          showAnchorIcon
+          isExternal
+          href={recipe.url}
+          underline="always"
+          rel="noreferrer"
+        >
+          {recipe.url}
+        </Link>
+      )}
     </>
   );
 }

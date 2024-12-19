@@ -2,6 +2,7 @@ create table recipes (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   image text,
+  url text,
   description text,
   prep_time text,
   cook_time text,

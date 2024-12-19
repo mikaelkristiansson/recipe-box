@@ -13,6 +13,8 @@ import {
   ModalBody,
   ModalFooter,
   Input,
+  Accordion,
+  AccordionItem,
 } from '@nextui-org/react';
 import { serialize } from 'tinyduration';
 import { Time } from '@internationalized/date';
@@ -83,108 +85,124 @@ export function CreateNewRecipe() {
   return (
     <Card>
       <CardBody>
-        <h2 className="text-large font-bold pb-2">Skapa nytt recept</h2>
-        <form className="flex flex-col gap-2" action={formAction} ref={formRef}>
-          <Input
-            label="Namn"
-            id="name"
-            name="name"
-            type="text"
-            placeholder="Namn på recept"
-            isRequired
-          />
-          <Input
-            label="Bild"
-            id="image"
-            name="image"
-            type="file"
-            placeholder="Bildfil"
-            isRequired
-          />
-          <Textarea
-            label="Beskrivning"
-            id="description"
-            name="description"
-            placeholder="Beskriv receptet"
-          />
-          <TimeInput
-            label="Total tid"
-            id="totalTime"
-            name="totalTime"
-            hourCycle={24}
-            hideTimeZone
-            defaultValue={new Time(0, 0)}
-            granularity="minute"
-          />
-          <Input
-            label="Portioner"
-            id="recipeYield"
-            name="recipeYield"
-            type="text"
-            placeholder="Antal portioner"
-          />
-          <Input
-            label="Kategori"
-            id="recipeCategory"
-            name="recipeCategory"
-            type="text"
-            placeholder="Kategori"
-          />
-          <Textarea
-            label="Ingredienser"
-            id="recipeIngredient"
-            name="recipeIngredient"
-            placeholder="skriv en ingrediens per rad"
-            isRequired
-          />
-          <Textarea
-            label="Instruktioner"
-            id="recipeInstructions"
-            name="recipeInstructions"
-            placeholder="skriv en instruktion per rad"
-            isRequired
-          />
+        <Accordion>
+          <AccordionItem
+            key="1"
+            aria-label="Skapa nytt recept"
+            title={
+              <h2 className="text-large font-bold pb-2">Skapa nytt recept</h2>
+            }
+          >
+            {/* <h2 className="text-large font-bold pb-2">Skapa nytt recept</h2> */}
+            <form
+              className="flex flex-col gap-2"
+              action={formAction}
+              ref={formRef}
+            >
+              <Input
+                label="Namn"
+                id="name"
+                name="name"
+                type="text"
+                placeholder="Namn på recept"
+                isRequired
+              />
+              <Input
+                label="Bild"
+                id="image"
+                name="image"
+                type="file"
+                placeholder="Bildfil"
+                isRequired
+              />
+              <Textarea
+                label="Beskrivning"
+                id="description"
+                name="description"
+                placeholder="Beskriv receptet"
+              />
+              <TimeInput
+                label="Total tid"
+                id="totalTime"
+                name="totalTime"
+                hourCycle={24}
+                hideTimeZone
+                defaultValue={new Time(0, 0)}
+                granularity="minute"
+              />
+              <Input
+                label="Portioner"
+                id="recipeYield"
+                name="recipeYield"
+                type="text"
+                placeholder="Antal portioner"
+              />
+              <Input
+                label="Kategori"
+                id="recipeCategory"
+                name="recipeCategory"
+                type="text"
+                placeholder="Kategori"
+              />
+              <Textarea
+                label="Ingredienser"
+                id="recipeIngredient"
+                name="recipeIngredient"
+                placeholder="skriv en ingrediens per rad"
+                isRequired
+              />
+              <Textarea
+                label="Instruktioner"
+                id="recipeInstructions"
+                name="recipeInstructions"
+                placeholder="skriv en instruktion per rad"
+                isRequired
+              />
 
-          <div className="flex flex-row gap-2">
-            <Button
-              color="secondary"
-              variant="flat"
-              size="sm"
-              type="button"
-              fullWidth
-              onPress={() => {
-                const elements = (formRef.current as HTMLFormElement).elements;
-                const formData = new FormData();
-                for (let i = 0; i < elements.length; i++) {
-                  const element = elements[i] as HTMLInputElement;
-                  if (element.type === 'file') {
-                    formData.append(element.name, element.files?.[0] as File);
-                    continue;
-                  }
-                  formData.append(element.name, element.value);
-                }
-                formData.append('preview', 'true');
-                const { recipe } = transformRecipe(null, formData) as {
-                  recipe: ScrapeRecipe;
-                };
-                setPreviewRecipe(recipe);
-                onOpen();
-              }}
-            >
-              Förhandsgranska
-            </Button>
-            <Button
-              color="primary"
-              variant="flat"
-              size="sm"
-              type="submit"
-              disabled={isPending}
-              fullWidth
-            >
-              Spara
-            </Button>
-          </div>
-        </form>
+              <div className="flex flex-row gap-2">
+                <Button
+                  color="secondary"
+                  variant="flat"
+                  type="button"
+                  fullWidth
+                  onPress={() => {
+                    const elements = (formRef.current as HTMLFormElement)
+                      .elements;
+                    const formData = new FormData();
+                    for (let i = 0; i < elements.length; i++) {
+                      const element = elements[i] as HTMLInputElement;
+                      if (element.type === 'file') {
+                        formData.append(
+                          element.name,
+                          element.files?.[0] as File
+                        );
+                        continue;
+                      }
+                      formData.append(element.name, element.value);
+                    }
+                    formData.append('preview', 'true');
+                    const { recipe } = transformRecipe(null, formData) as {
+                      recipe: ScrapeRecipe;
+                    };
+                    setPreviewRecipe(recipe);
+                    onOpen();
+                  }}
+                >
+                  Förhandsgranska
+                </Button>
+                <Button
+                  color="primary"
+                  variant="flat"
+                  type="submit"
+                  disabled={isPending}
+                  fullWidth
+                >
+                  Spara
+                </Button>
+              </div>
+            </form>
+          </AccordionItem>
+        </Accordion>
         {previewRecipe ? (
           <Modal
             isOpen={isOpen}
@@ -204,12 +222,7 @@ export function CreateNewRecipe() {
                     <RecipePreview recipe={previewRecipe} />
                   </ModalBody>
                   <ModalFooter>
-                    <Button
-                      size="sm"
-                      color="danger"
-                      variant="light"
-                      onPress={onClose}
-                    >
+                    <Button color="danger" variant="light" onPress={onClose}>
                       Stäng
                     </Button>
                   </ModalFooter>
