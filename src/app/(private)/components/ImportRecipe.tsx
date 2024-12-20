@@ -72,7 +72,7 @@ export function ImportNewRecipe({
   };
 
   return (
-    <Card>
+    <Card shadow="sm">
       <CardBody>
         <h2 className="text-large font-bold pb-2">Importera recept från URL</h2>
         <form className="flex flex-col gap-2" action={formAction}>

@@ -18,8 +18,12 @@ import {
 } from '@nextui-org/react';
 import { serialize } from 'tinyduration';
 import { Time } from '@internationalized/date';
-import { useState, useRef, useActionState } from 'react';
+import { useState, useRef, useActionState, useEffect } from 'react';
 import { saveRecipe } from '../actions';
+import { toast } from 'sonner';
+import { useRecipeList } from '@/hooks/useRecipeList';
+import { useRecipe } from '@/hooks/useRecipe';
+import { TabKey } from '@/app/types';
 
 function transformRecipe(_prevState: any, formData: FormData) {
   const totalTime = formData.get('totalTime') as string;
@@ -75,15 +79,43 @@ function transformRecipe(_prevState: any, formData: FormData) {
   return { status: 'preview', recipe };
 }
 
-export function CreateNewRecipe() {
+export function CreateNewRecipe({
+  setActiveTab,
+}: {
+  setActiveTab: (key: TabKey) => void;
+}) {
   const [previewRecipe, setPreviewRecipe] = useState<null | ScrapeRecipe>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const [_state, formAction, isPending] = useActionState(transformRecipe, null);
+  const [state, formAction, isPending] = useActionState(transformRecipe, null);
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { action: listAction } = useRecipeList();
+  const { action } = useRecipe();
+
+  useEffect(() => {
+    if (state?.data) {
+      listAction({ type: 'update', data: state.data });
+      toast.success('Receptet har sparats', {
+        description: 'Vill du kolla på receptet?',
+        action: {
+          label: 'Titta',
+          onClick: () => {
+            setActiveTab('recipes');
+            action({
+              type: 'update',
+              data: { id: state.data.id },
+            });
+          },
+        },
+      });
+    }
+    if (state?.status === 'error') {
+      toast.error('Något gick fel');
+    }
+  }, [state]);
 
   return (
-    <Card>
+    <Card shadow="sm">
       <CardBody>
         <Accordion>
           <AccordionItem
@@ -93,7 +125,6 @@ export function CreateNewRecipe() {
               <h2 className="text-large font-bold pb-2">Skapa nytt recept</h2>
             }
           >
-            {/* <h2 className="text-large font-bold pb-2">Skapa nytt recept</h2> */}
             <form
               className="flex flex-col gap-2"
               action={formAction}

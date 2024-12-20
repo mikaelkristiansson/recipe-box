@@ -48,10 +48,10 @@ export function PageTabs({ activeTab }: { activeTab: TabKey }) {
       </Tab>
       <Tab key="add" title={<IconsTaskAdd className="h-6 w-6" />}>
         <ImportNewRecipe setActiveTab={setActiveTab} />
-        <CreateNewRecipe />
+        <CreateNewRecipe setActiveTab={setActiveTab} />
       </Tab>
       <Tab key="week" title={<IconsCalendar className="h-6 w-6" />}>
-        <Card>
+        <Card shadow="sm">
           <CardBody>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
             eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim

@@ -27,7 +27,7 @@ export function RecipeView(props: { recipe: Recipe }) {
   return (
     <>
       <Image
-        shadow="md"
+        shadow="sm"
         radius="md"
         width="100%"
         alt={recipe.name}

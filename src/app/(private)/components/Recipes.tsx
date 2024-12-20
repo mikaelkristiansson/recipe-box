@@ -78,6 +78,7 @@ export function Recipes() {
         {recipes.map((item) => (
           <Card
             key={item.id}
+            shadow="sm"
             isPressable
             onPress={() => {
               action({ type: 'update', data: { id: item.id } });
@@ -103,7 +104,7 @@ export function Recipes() {
               )}
             </CardBody>
             <CardFooter className="text-small justify-between">
-              <b className="text-left">{item.name}</b>
+              <b className="text-left font-normal">{item.name}</b>
             </CardFooter>
           </Card>
         ))}
@@ -157,6 +158,7 @@ export function Recipes() {
                       deleteRecipe(activeRecipe.id).then(() => {
                         onOpenChange();
                         listAction({ type: 'delete', data: activeRecipe });
+                        closeRecipe();
                       })
                     }
                   >
