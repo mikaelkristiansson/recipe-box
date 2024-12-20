@@ -10,3 +10,8 @@ body {
 button[aria-label='Close'] > svg {
   @apply w-6 h-6;
 }
+
+input[type='text']:focus,
+textarea:focus {
+  -webkit-text-size-adjust: 100%;
+}
