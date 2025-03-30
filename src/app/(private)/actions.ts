@@ -165,3 +165,18 @@ export async function deleteRecipe(id: string) {
   }
   return { status: 'success' };
 }
+
+export async function deleteUser(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from('profiles').delete().eq('id', id);
+  const { error: userError } = await supabase
+    .from('users')
+    .delete()
+    .eq('id', id);
+
+  if (error || userError) {
+    console.error(error);
+    return { status: 'error' };
+  }
+  return { status: 'success' };
+}

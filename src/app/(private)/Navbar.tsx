@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { IconsUserCircle } from '@/components/icons/user.icon';
 import { IconsPackageOpen } from '@/components/icons/box.icon';
 import {
+  Button,
   Card,
   CardBody,
   Chip,
@@ -97,10 +98,25 @@ export function NavigationBar() {
         <ModalContent>
           <ModalHeader>Inställningar</ModalHeader>
           <ModalBody>
-            <Card>
+            <Card shadow="sm">
               <CardBody>
                 <h2 className="text-md font-semibold pb-1">Tema</h2>
                 <ThemeSwitcher />
+              </CardBody>
+            </Card>
+            <Card shadow="sm">
+              <CardBody>
+                <div className="flex flex-row gap-2 items-center justify-between">
+                  <div className="flex flex-col">
+                    <h2 className="text-md font-semibold">Radera konto</h2>
+                    <span className="font-thin text-xs">
+                      Ta bort dit konto och all data
+                    </span>
+                  </div>
+                  <Button color="danger" variant="flat">
+                    Radera konto
+                  </Button>
+                </div>
               </CardBody>
             </Card>
           </ModalBody>
