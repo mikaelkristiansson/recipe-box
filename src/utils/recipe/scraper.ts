@@ -1,7 +1,7 @@
-import type { Page } from 'playwright';
-import chromium from "playwright-aws-lambda";
+import chromium from '@sparticuz/chromium';
 // @ts-expect-error - microdata-node has no types
 import { toJson } from 'microdata-node';
+import { Page } from 'puppeteer-core';
 
 export type ScrapeRecipe = {
   name: string;
@@ -37,61 +37,72 @@ export type ScrapeRecipe = {
   cookingMethod?: string;
 };
 
+type LangAttribute = 'sv-SE' | 'en-US';
+
 const scrapeWebsite = async (page: Page) => {
-  const langAttribute =
-    (await page.locator('html').first().getAttribute('lang')) || 'en-US';
+  const langAttribute = ((await page.$eval('html', (el) =>
+    el.getAttribute('lang'),
+  )) || 'en-US') as LangAttribute;
+
   const ingredientLanguages = {
     'sv-SE': 'Ingredienser',
     'en-US': 'Ingredients',
-  } as { [key: string]: string };
+  };
 
   const instructionLanguages = {
     'sv-SE': 'Såhär gör du',
     'en-US': 'This is how you do it',
-  } as { [key: string]: string };
+  };
 
-  // Scrape the recipe using advanced techniques
   // Utility function to clean text by trimming, normalizing spaces, etc.
   const cleanText = (text: string) => text.trim().replace(/\s+/g, ' ');
-  const h1 = page.locator('h1').first();
-  const name = await h1.innerText();
 
-  // Scrape the title
-  const title = h1 ? cleanText(name) : 'Title not found';
+  // Scrape the recipe title
+  const name = await page.$eval('h1', (el) => el.innerText);
+  const title = name ? cleanText(name) : 'Title not found';
+
   const splitName = name.split(' ');
   const shortName = splitName
     .slice(0, Math.floor(splitName.length / 2))
     .join(' ');
+
   let imageSrc = '';
-  let image = page
-    .locator(`//img[contains(@alt, '${shortName.toLowerCase().trim()}')]`)
-    .first();
-  if (!image) {
-    image = page
-      .locator(`//img[contains(@src, '${title.toLowerCase().trim()}')]`)
-      .first();
-  }
-  if (image) {
-    imageSrc = (await image.getAttribute('src')) || '';
+
+  let image = await (page as any).$x(
+    `//img[contains(@alt, '${shortName.toLowerCase().trim()}')]`,
+  );
+  if (image.length === 0) {
+    image = await (page as any).$x(
+      `//img[contains(@src, '${title.toLowerCase().trim()}')]`,
+    );
   }
 
-  const ingredients = page
-    .locator(
-      `//*[contains(text(), '${ingredientLanguages[langAttribute]}')]/following::p[1]//parent::div`
-    )
-    .first();
-  const ingredientsContent = await ingredients.innerText();
+  if (image.length > 0) {
+    imageSrc =
+      (await image[0].evaluate((el: HTMLElement) => el.getAttribute('src'))) ||
+      '';
+  }
 
-  const instructions = page
-    .locator(
-      `//*[contains(text(), '${instructionLanguages[langAttribute]}')]/following::p[1]//parent::div`
-    )
-    .first();
-  const instructionsContent = await instructions.innerText();
+  // Scrape ingredients
+  const ingredientsXPath = `//*[contains(text(), '${ingredientLanguages[langAttribute]}')]/following::p[1]//parent::div`;
+  const ingredientsElement = await (page as any).$x(ingredientsXPath);
+  const ingredientsContent: string =
+    ingredientsElement.length > 0
+      ? await ingredientsElement[0].evaluate((el: HTMLElement) => el.innerText)
+      : '';
+
+  // Scrape instructions
+  const instructionsXPath = `//*[contains(text(), '${instructionLanguages[langAttribute]}')]/following::p[1]//parent::div`;
+  const instructionsElement = await (page as any).$x(instructionsXPath);
+  const instructionsContent =
+    instructionsElement.length > 0
+      ? await instructionsElement[0].evaluate((el: HTMLElement) => el.innerText)
+      : '';
+
   const recipeInstructions = instructionsContent
     .split('\n')
-    .filter((text) => text.length > 0)
-    .map((text) => ({
+    .filter((text: string) => text.length > 0)
+    .map((text: string) => ({
       '@type': 'HowToStep',
       name: 'Step',
       text,
@@ -99,7 +110,12 @@ const scrapeWebsite = async (page: Page) => {
       image: '',
     }));
 
-  if (!title || !ingredientsContent || !instructionsContent || !image) {
+  if (
+    !title ||
+    !ingredientsContent ||
+    !instructionsContent ||
+    image.length === 0
+  ) {
     return null;
   }
 
@@ -122,30 +138,44 @@ const scrapeMicrodata = async (page: Page) => {
 };
 
 export const getScrapedRecipe = async (
-  url: string
+  url: string,
 ): Promise<ScrapeRecipe | { message: string }> => {
   let browser = null;
   try {
-    browser = await chromium.launchChromium({
-      headless: true,
-    });
-    const context = await browser.newContext();
+    // Launch the browser in production or development mode depending on the environment
+    if (process.env.NODE_ENV === 'production') {
+      const puppeteer = await import('puppeteer-core');
+      browser = await puppeteer.launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(
+          'https://github.com/Sparticuz/chromium/releases/download/v122.0.0/chromium-v122.0.0-pack.tar',
+        ),
+        headless: true,
+        // ignoreHTTPSErrors: true,
+      });
+    } else if (process.env.NODE_ENV === 'development') {
+      const puppeteer = await import('puppeteer-core');
+      const { executablePath } = await import('puppeteer');
+      browser = await puppeteer.launch({
+        executablePath: executablePath(),
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        headless: true,
+      });
+    }
 
-    const page = await context.newPage();
+    if (!browser) {
+      throw new Error('Failed to launch browser');
+    }
+    const page = await browser.newPage();
     await page.goto(url);
 
     // Get all scripts of type "application/ld+json" from the provided url
-    const jsonLdData: string[] = await page.evaluate(() => {
-      const scriptTags: NodeListOf<HTMLScriptElement> =
-        document.querySelectorAll('script[type="application/ld+json"]');
-
-      const data: string[] = [];
-
-      scriptTags.forEach((scriptTag: HTMLScriptElement) => {
-        data.push(scriptTag.innerHTML);
-      });
-
-      return data;
+    const jsonLdData = await page.evaluate(() => {
+      const scriptTags = Array.from(
+        document.querySelectorAll('script[type="application/ld+json"]'),
+      );
+      return scriptTags.map((script) => script.innerHTML);
     });
 
     let scriptWithRecipeData: string = '';
@@ -171,7 +201,6 @@ export const getScrapedRecipe = async (
         scriptWithRecipeData = JSON.stringify(data);
       }
     }
-    await browser.close();
 
     // Parse the correct json string
     const rawRecipeData: ScrapeRecipe = JSON.parse(scriptWithRecipeData);
@@ -202,7 +231,7 @@ const getMicrodata = (html: string) => {
     return null;
   }
   const recipe = Object.values(meta.items).find(
-    (item) => item.type && item.type[0].indexOf('Recipe') > -1
+    (item) => item.type && item.type[0].indexOf('Recipe') > -1,
   );
   return recipe;
 };
