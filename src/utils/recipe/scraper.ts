@@ -1,4 +1,5 @@
-import { Browser, chromium, Page } from 'playwright';
+import type { Browser, Page } from 'playwright';
+import chromium from "playwright-aws-lambda";
 // @ts-expect-error - microdata-node has no types
 import { toJson } from 'microdata-node';
 
@@ -124,7 +125,7 @@ export const getScrapedRecipe = async (
   url: string
 ): Promise<ScrapeRecipe | { message: string }> => {
   try {
-    const browser: Browser = await chromium.launch({
+    const browser: Browser = await chromium.launchChromium({
       headless: true,
     });
 
